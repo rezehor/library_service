@@ -1,6 +1,6 @@
 from django.db import models
 
-from library.models import Book
+from book.models import Book
 from library_service.settings import AUTH_USER_MODEL
 
 
