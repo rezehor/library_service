@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Book(models.Model):
     class Cover(models.TextChoices):
         HARD = "Hard"
@@ -9,3 +10,6 @@ class Book(models.Model):
     cover = models.CharField(choices=Cover, max_length=10)
     inventory = models.PositiveIntegerField()
     daily_fee = models.DecimalField(max_digits=5, decimal_places=2)
+
+    def __str__(self):
+        return self.title
