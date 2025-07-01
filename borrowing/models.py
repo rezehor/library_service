@@ -23,12 +23,12 @@ class Borrowing(models.Model):
     def validate_borrowing(borrow_date, expected_return_date, actual_return_date, error_to_raise):
         if expected_return_date < borrow_date:
             raise error_to_raise({
-                "expected_return_date": "Expected return date cannot be before borrow date."
+                f"Expected return date {expected_return_date} cannot be before borrow date {borrow_date}."
             })
 
         if actual_return_date and actual_return_date < borrow_date:
             raise error_to_raise({
-                "actual_return_date": "Actual return date cannot be before borrow date."
+                f"Actual return date {actual_return_date} cannot be before borrow date {borrow_date}."
             })
 
     def clean(self):
