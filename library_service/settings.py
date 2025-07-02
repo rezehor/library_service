@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "book",
     "borrowing",
-    "user"
+    "user",
+    "payment"
 ]
 
 AUTH_USER_MODEL = "user.User"
