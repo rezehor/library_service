@@ -7,6 +7,7 @@ from borrowing.serializers import BorrowingSerializer, BorrowingDetailSerializer
 
 class BorrowingViewSet(mixins.RetrieveModelMixin,
                        mixins.ListModelMixin,
+                       mixins.CreateModelMixin,
                        GenericViewSet):
     queryset = Borrowing.objects.all()
 
