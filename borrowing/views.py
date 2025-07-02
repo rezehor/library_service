@@ -1,3 +1,5 @@
+import asyncio
+
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -5,6 +7,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from borrowing.models import Borrowing
 from borrowing.serializers import BorrowingSerializer, BorrowingDetailSerializer, BorrowingReturnSerializer
+from borrowing.telegram_bot import run_bot, CHAT_ID
 
 
 class BorrowingViewSet(mixins.RetrieveModelMixin,
@@ -34,4 +37,15 @@ class BorrowingViewSet(mixins.RetrieveModelMixin,
         return Response({"detail": "Book returned successfully."}, status=status.HTTP_200_OK)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        borrowing = serializer.save(user=self.request.user)
+
+        message = (
+            "New borrowing created:",
+            f"User: {borrowing.user.username} (ID: {borrowing.user.id})",
+            f"Book: {borrowing.book.title} (ID: {borrowing.book.id})",
+            f"Borrow date: {borrowing.borrow_date}",
+            f"Expected return date: {borrowing.expected_return_date}"
+        )
+
+        asyncio.run(run_bot(message, CHAT_ID))
+
