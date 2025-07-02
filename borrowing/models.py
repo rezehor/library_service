@@ -20,22 +20,35 @@ class Borrowing(models.Model):
 
 
     @staticmethod
-    def validate_borrowing(borrow_date, expected_return_date, actual_return_date, error_to_raise):
+    def validate_borrowing(
+            borrow_date,
+            expected_return_date,
+            actual_return_date,
+            book,
+            error_to_raise,
+    ):
         if expected_return_date < borrow_date:
             raise error_to_raise({
-                f"Expected return date {expected_return_date} cannot be before borrow date {borrow_date}."
+                "expected_return_date": f"Expected return date {expected_return_date} cannot be before borrow date {borrow_date}."
             })
 
         if actual_return_date and actual_return_date < borrow_date:
             raise error_to_raise({
-                f"Actual return date {actual_return_date} cannot be before borrow date {borrow_date}."
+                "actual_return_date": f"Actual return date {actual_return_date} cannot be before borrow date {borrow_date}."
             })
+
+        if book.inventory <= 0:
+            raise error_to_raise({
+                "book": "Unfortunately, this book is no longer available."
+            })
+
 
     def clean(self):
         self.validate_borrowing(
             self.borrow_date,
             self.expected_return_date,
             self.actual_return_date,
+            self.book,
             ValidationError
         )
 
