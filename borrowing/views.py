@@ -2,6 +2,7 @@ import asyncio
 
 from rest_framework import mixins, status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -15,7 +16,13 @@ class BorrowingViewSet(mixins.RetrieveModelMixin,
                        mixins.CreateModelMixin,
                        GenericViewSet):
     queryset = Borrowing.objects.all()
+    permission_classes = (IsAuthenticated,)
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser or user.is_staff:
+            return self.queryset.all()
+        return self.queryset.filter(user=user)
 
     def get_serializer_class(self):
         if self.action == "retrieve":
