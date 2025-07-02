@@ -11,6 +11,7 @@ class BorrowingViewSet(mixins.RetrieveModelMixin,
                        GenericViewSet):
     queryset = Borrowing.objects.all()
 
+
     def get_serializer_class(self):
         if self.action == "retrieve":
             return BorrowingDetailSerializer

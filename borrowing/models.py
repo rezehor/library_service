@@ -12,8 +12,6 @@ class Borrowing(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
 
-    class Meta:
-        ordering = ["-expected_return_date"]
 
     def __str__(self):
         return f"User({self.user.id}), Book({self.book.id}), Date({self.borrow_date}-{self.expected_return_date})"
@@ -60,7 +58,14 @@ class Borrowing(models.Model):
             using=None,
             update_fields=None,
     ):
+        borrowing_is_new = self.pk is None
         self.full_clean()
-        return super(Borrowing, self).save(
+        result = super().save(
             force_insert, force_update, using, update_fields
         )
+
+        if borrowing_is_new:
+            self.book.inventory -= 1
+            self.book.save(update_fields=["inventory"])
+
+        return result
