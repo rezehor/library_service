@@ -12,6 +12,9 @@ class Borrowing(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
 
+    def total_price(self):
+        return self.book.daily_fee * (self.expected_return_date - self.borrow_date).days
+
 
     def __str__(self):
         return f"User({self.user.id}), Book({self.book.id}), Date({self.borrow_date}-{self.expected_return_date})"
