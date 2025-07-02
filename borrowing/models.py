@@ -24,6 +24,7 @@ class Borrowing(models.Model):
             actual_return_date,
             book,
             error_to_raise,
+            check_inventory=True
     ):
         if expected_return_date < borrow_date:
             raise error_to_raise({
@@ -35,19 +36,21 @@ class Borrowing(models.Model):
                 "actual_return_date": f"Actual return date {actual_return_date} cannot be before borrow date {borrow_date}."
             })
 
-        if book.inventory <= 0:
+        if check_inventory and book.inventory <= 0:
             raise error_to_raise({
                 "book": "Unfortunately, this book is no longer available."
             })
 
 
     def clean(self):
+        check_inventory = not self.actual_return_date
         self.validate_borrowing(
             self.borrow_date,
             self.expected_return_date,
             self.actual_return_date,
             self.book,
-            ValidationError
+            ValidationError,
+            check_inventory
         )
 
     def save(
