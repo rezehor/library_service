@@ -1,14 +1,19 @@
 import asyncio
 
+from django.shortcuts import redirect
 from rest_framework import mixins, status
 from rest_framework.decorators import action
+from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from borrowing.models import Borrowing
 from borrowing.serializers import BorrowingSerializer, BorrowingDetailSerializer, BorrowingReturnSerializer
 from borrowing.telegram_bot import run_bot, CHAT_ID
+from payment.models import Payment
+from payment.stripe_payment import create_stripe_checkout_session
 
 
 class BorrowingViewSet(mixins.RetrieveModelMixin,
@@ -54,5 +59,15 @@ class BorrowingViewSet(mixins.RetrieveModelMixin,
             f"Expected return date: {borrowing.expected_return_date}"
         )
 
-        asyncio.run(run_bot(message, CHAT_ID))
+        payment = Payment.objects.create(
+            borrowing=borrowing,
+            money_to_pay=borrowing.total_price(),
+            status=Payment.Status.PENDING,
+            type=Payment.Type.PAYMENT
+        )
+        session = create_stripe_checkout_session(payment, self.request)
+        payment.session_id = session.id
+        payment.session_url = session.url
+        payment.save()
 
+        asyncio.run(run_bot(message, CHAT_ID))
